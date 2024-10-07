@@ -7,6 +7,10 @@ public class AplicacionDbContext:DbContext
     public AplicacionDbContext(DbContextOptions<AplicacionDbContext> opciones)
         : base(opciones)
     {}
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseNpgsql("Server=localhost;Database=BD_WebApi;User=root;Password=root");
+    }
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Rol> Rols { get; set; }
     public DbSet<UsuarioRol> UsuarioRols { get; set; }
