@@ -1,51 +1,46 @@
-namespace Api.Funcionalidades.Rol;
-
+using Carter;
 using Microsoft.AspNetCore.Mvc;
+namespace Api.Funcionalidades.Rol;
 
 [Route("api/[controller]")]
 [ApiController]
-public class RolController : ControllerBase
+public class RolEndpoints :ICarterModule
 {
-    private readonly IRolServices _rolServices;
-
-    public RolController(IRolServices rolServices)
+   public void AddRoutes(IEndpointRouteBuilder app)
     {
-        _rolServices = rolServices;
-    }
+         // Obtener todos los roles
+        app.MapGet("/api/roles", async ([FromServices] IRolServices rolServices) =>
+        {
+            var roles = rolServices.GetRol();
+            return Results.Ok(roles);
+        }).WithName("VerRoles");
 
-    [HttpPost]
-    public IActionResult CreateRol([FromBody] RolCommandDto rolCommandDto)
-    {
-        _rolServices.CreateRol(rolCommandDto);
-        return CreatedAtAction(nameof(GetRol), new { id = rolCommandDto.IdRol }, rolCommandDto);
-    }
+        // Obtener un rol específico por su Id
+        app.MapGet("/api/roles/{idRol}", ([FromServices] IRolServices rolServices, int idRol) =>
+        {
+            var rol = rolServices.GetRol(idRol);
+            return Results.Ok(rol);
+        }).WithName("Buscar Rol por id");
 
-    [HttpGet]
-    public IActionResult GetRols()
-    {
-        var roles = _rolServices.GetRol();
-        return Ok(roles);
-    }
+        // Crear un nuevo rol
+        app.MapPost("/api/roles", ([FromServices] IRolServices rolServices, [FromBody] RolCommandDto rolDto) =>
+        {
+            rolServices.CreateRol(rolDto);
+            return Results.Ok("Rol creado exitosamente");
+        }).WithName("Crear Rol");
 
-    [HttpGet("{id}")]
-    public IActionResult GetRol(int id)
-    {
-        var rol = _rolServices.GetRol(id);
-        if (rol == null) return NotFound();
-        return Ok(rol);
-    }
+        // Actualizar un rol existente
+        app.MapPut("/api/roles/{idRol}", ([FromServices] IRolServices rolServices, int idRol, [FromBody] RolCommandDto rolDto) =>
+        {
+            rolServices.UpdateRol(idRol, rolDto);
+            return Results.Ok("Rol actualizado exitosamente");
+        }).WithName("Modificar Rol");
 
-    [HttpPut("{id}")]
-    public IActionResult UpdateRol(int id, [FromBody] RolCommandDto rolCommandDto)
-    {
-        _rolServices.UpdateRol(id, rolCommandDto);
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public IActionResult DeleteRol(int id)
-    {
-        _rolServices.DeleteRol(id);
-        return NoContent();
+        // Eliminar un rol por su Id
+        app.MapDelete("/api/roles/{idRol}", ([FromServices] IRolServices rolServices, int idRol) =>
+        {
+            rolServices.DeleteRol(idRol);
+            return Results.Ok("Rol eliminado exitosamente");
+        }).WithName("Eliminar Rol");
     }
 }

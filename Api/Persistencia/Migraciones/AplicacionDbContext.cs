@@ -9,7 +9,7 @@ public class AplicacionDbContext:DbContext
     {}
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Server=localhost;Database=BD_WebApi;User=root;Password=root");
+        optionsBuilder.UseNpgsql("Server=localhost;Database=BD_WebApi;User=postgres;Password=root");
     }
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Rol> Rols { get; set; }

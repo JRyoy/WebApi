@@ -1,108 +1,37 @@
-using Api.Funcionalidades.Usuario;
-using Api.Funcionalidades.Rol;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Api.Migraciones;
-using Entidades;
+using Carter;
+using Api.Funcionalidades.Usuario;
 using static Api.Funcionalidades.UsuarioRol.UsuarioRolDto;
-namespace Api.Funcionalidades.UsuarioRol;
 
+namespace Api.Funcionalidades.UsuarioRol;
 [ApiController]
 [Route("api/[controller]")]
-public class UsuarioRolEndpoints : ControllerBase
+
+public class UsuarioRolEndpoints : ICarterModule
 {
-
-        private readonly IUsuarioRolServices _usuarioRolServices;
-
-        public UsuarioRolEndpoints(IUsuarioRolServices usuarioRolServices)
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+        app.MapPost("/Asignar Rol", async (IUsuarioRolServices usuarioRolServices, UsuarioRolCommandDto usuarioRolDto) =>
         {
-            _usuarioRolServices = usuarioRolServices;
-        }
+            usuarioRolServices.AsignarRol(usuarioRolDto);
+            return Results.Ok("Rol asignado exitosamente.");
+        });
 
-        [HttpPost("{idRol}/usuario/{idUsuario}")]
-        public IActionResult AgregarUsuarioRol(int idRol, int idUsuario)
+        app.MapDelete("/Eliminar Rol de Un Usuario/{idUsuario:int}/{idRol:int}", async (IUsuarioRolServices usuarioRolServices, int idUsuario, int idRol) =>
         {
-            try
-            {
-                var usuarioRolDto = new UsuarioRolCommandDto { IdUsuario = idUsuario, IdRol = idRol };
-                _usuarioRolServices.AsignarRol(usuarioRolDto);
-                return Ok("Rol asignado correctamente");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
+            usuarioRolServices.DeleteRoldelUsuario(idUsuario, idRol);
+            return Results.Ok("Rol eliminado exitosamente del usuario.");
+        });
 
-        [HttpDelete("{idRol}/usuario/{idUsuario}")]
-        public IActionResult EliminarUsuarioRol(int idRol, int idUsuario)
+        app.MapGet("Ver Roles del Usuario/{idUsuario:int}", async (IUsuarioRolServices usuarioRolServices, int idUsuario) =>
         {
-            try
-            {
-                _usuarioRolServices.DeleteRoldelUsuario(idUsuario, idRol);
-                return Ok("Rol eliminado correctamente");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [HttpPost("usuario/{idUsuario}/rol/{idRol}")]
-        public IActionResult AgregarUsuarioRolReverso(int idUsuario, int idRol)
-        {
-            try
-            {
-                var usuarioRolDto = new UsuarioRolCommandDto { IdUsuario = idUsuario, IdRol = idRol };
-                _usuarioRolServices.AsignarRol(usuarioRolDto);
-                return Ok("Rol asignado correctamente");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [HttpDelete("usuario/{idUsuario}/rol/{idRol}")]
-        public IActionResult EliminarUsuarioRolReverso(int idUsuario, int idRol)
-        {
-            try
-            {
-                _usuarioRolServices.DeleteRoldelUsuario(idUsuario, idRol);
-                return Ok("Rol eliminado correctamente");
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
+            var roles = usuarioRolServices.GetRolesdelUsuario(idUsuario);
+            return Results.Ok(roles);
+        });
     }
+}
+
+    
 
 
 
